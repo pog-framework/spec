@@ -1,4 +1,4 @@
-# PoG Framework — Proof of Governance
+# PoG Framework - Proof of Governance
 
 **An open framework for turning security and AI-driven decisions into traceable, sealed, verifiable evidence.**
 
@@ -36,7 +36,7 @@ PoG is a framework initiated and maintained by **Smart STB Sàrl** (Geneva, Swit
 |-------|------|--------|
 | Technical credibility | Sealing, verification, event-to-evidence chain, tenant-safe attribution | In place (reference implementation) |
 | Framework formalization | Spec, threat model, conformance plan drafted, versioned, published | In progress (drafts v1.0) |
-| External review | Substantive adversarial review by parties independent of Smart STB | Open — reviewers wanted |
+| External review | Substantive adversarial review by parties independent of Smart STB | Open - reviewers wanted |
 | Independent implementation | At least one conformant implementation not written by the authors | Not started |
 | Protocol-grade language | Stable spec, provable conformance, multiple coherent implementations | **Not earned, by design** |
 
