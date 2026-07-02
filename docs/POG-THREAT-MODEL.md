@@ -324,7 +324,7 @@ Privileged insider manipulates packs, revokes seals improperly, or edits metadat
 
 ## 10. Adversarial Scenarios
 
-### Scenario A — Cross-Tenant Seal Poisoning
+### Scenario A - Cross-Tenant Seal Poisoning
 Attacker submits malformed event payload causing tenant mismatch but successful pack creation.
 
 **Expected Control Outcome**
@@ -333,7 +333,7 @@ Attacker submits malformed event payload causing tenant mismatch but successful 
 - no seal created,
 - alert emitted.
 
-### Scenario B — Evidence Swap After Sealing
+### Scenario B - Evidence Swap After Sealing
 Attacker modifies stored evidence item after pack sealed.
 
 **Expected Control Outcome**
@@ -341,7 +341,7 @@ Attacker modifies stored evidence item after pack sealed.
 - payload hash mismatch recorded,
 - alert emitted.
 
-### Scenario C — Revoked Seal Publicly Appears Valid
+### Scenario C - Revoked Seal Publicly Appears Valid
 Cached layer serves old valid status for revoked seal.
 
 **Expected Control Outcome**
@@ -350,7 +350,7 @@ Cached layer serves old valid status for revoked seal.
 - revoked status returned,
 - stale cache incident created.
 
-### Scenario D — Malformed Identifier Enumeration
+### Scenario D - Malformed Identifier Enumeration
 Automated actor probes verify endpoint with malformed or guessed IDs.
 
 **Expected Control Outcome**
@@ -359,7 +359,7 @@ Automated actor probes verify endpoint with malformed or guessed IDs.
 - rate limits,
 - no leakage of internal identifiers.
 
-### Scenario E — Unauthorized Reseal by Insider
+### Scenario E - Unauthorized Reseal by Insider
 Admin reseals corrected pack without recording prior invalidity.
 
 **Expected Control Outcome**
@@ -367,7 +367,7 @@ Admin reseals corrected pack without recording prior invalidity.
 - old seal retained,
 - superseded relation stored.
 
-### Scenario F — Chain Link Corruption
+### Scenario F - Chain Link Corruption
 Chain predecessor hash missing or inconsistent after migration.
 
 **Expected Control Outcome**
@@ -442,20 +442,20 @@ Each residual risk MUST be documented, accepted, reduced, or scheduled.
 
 ## 14. Security Review Gates
 
-### Gate 1 — Design Review
+### Gate 1 - Design Review
 Before implementation:
 - trust boundaries approved,
 - abuse cases reviewed,
 - controls assigned.
 
-### Gate 2 — Pre-Release Review
+### Gate 2 - Pre-Release Review
 Before shipping:
 - threat model updated,
 - key negative tests passing,
 - access control verified,
 - logs and alerts implemented.
 
-### Gate 3 — Post-Release Review
+### Gate 3 - Post-Release Review
 After release:
 - verify telemetry reviewed,
 - incidents analyzed,

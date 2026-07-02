@@ -33,7 +33,7 @@ Testing begins only when:
 
 ## 4. Positive Tests
 
-### POG-TST-001 — Valid Seal Verification
+### POG-TST-001 - Valid Seal Verification
 - **Objective**: Verify that a correctly sealed object validates successfully.
 - **Preconditions**: Existing evidence pack with valid seal.
 - **Input**: Valid `seal_id`.
@@ -46,7 +46,7 @@ Testing begins only when:
 - **Severity**: Critical
 - **Automation Feasibility**: High
 
-### POG-TST-002 — Pack Metadata Retrieval
+### POG-TST-002 - Pack Metadata Retrieval
 - **Objective**: Ensure pack metadata endpoint returns canonical state.
 - **Preconditions**: Existing pack.
 - **Input**: Valid `pack_id`.
@@ -58,7 +58,7 @@ Testing begins only when:
 - **Severity**: High
 - **Automation Feasibility**: High
 
-### POG-TST-003 — Decision Retrieval
+### POG-TST-003 - Decision Retrieval
 - **Objective**: Verify governance decision lookup works.
 - **Preconditions**: Existing decision linked to incident or action.
 - **Input**: Valid `decision_id`.
@@ -67,7 +67,7 @@ Testing begins only when:
 - **Severity**: Medium
 - **Automation Feasibility**: High
 
-### POG-TST-004 — Revocation Visibility
+### POG-TST-004 - Revocation Visibility
 - **Objective**: Confirm revoked objects are still queryable.
 - **Preconditions**: Existing revoked seal.
 - **Input**: Revoked `seal_id`.
@@ -81,7 +81,7 @@ Testing begins only when:
 
 ## 5. Negative Tests
 
-### POG-TST-005 — Unknown Seal
+### POG-TST-005 - Unknown Seal
 - **Objective**: Validate handling of non-existent identifiers.
 - **Preconditions**: None.
 - **Input**: Well-formed but unknown UUID.
@@ -92,7 +92,7 @@ Testing begins only when:
 - **Severity**: High
 - **Automation Feasibility**: High
 
-### POG-TST-006 — Malformed Identifier
+### POG-TST-006 - Malformed Identifier
 - **Objective**: Validate handling of malformed seal identifiers.
 - **Preconditions**: None.
 - **Input**: Invalid string, e.g. `abc`.
@@ -103,7 +103,7 @@ Testing begins only when:
 - **Severity**: Medium
 - **Automation Feasibility**: High
 
-### POG-TST-007 — Unsupported Schema Version
+### POG-TST-007 - Unsupported Schema Version
 - **Objective**: Ensure unsupported schema fails safely.
 - **Preconditions**: Fixture with incompatible schema version.
 - **Input**: Verification request for incompatible object.
@@ -114,7 +114,7 @@ Testing begins only when:
 - **Severity**: Critical
 - **Automation Feasibility**: Medium
 
-### POG-TST-008 — Duplicate Sealing Attempt
+### POG-TST-008 - Duplicate Sealing Attempt
 - **Objective**: Block duplicate seal creation on already sealed object when not allowed.
 - **Preconditions**: Existing sealed object.
 - **Input**: POST seal again.
@@ -127,7 +127,7 @@ Testing begins only when:
 
 ## 6. Adversarial Tests
 
-### POG-TST-009 — Payload Hash Tampering
+### POG-TST-009 - Payload Hash Tampering
 - **Objective**: Ensure modified payload invalidates verification.
 - **Preconditions**: Existing sealed pack.
 - **Input**: Tamper with canonical object payload after sealing.
@@ -138,7 +138,7 @@ Testing begins only when:
 - **Severity**: Critical
 - **Automation Feasibility**: Medium
 
-### POG-TST-010 — Chain Break Detection
+### POG-TST-010 - Chain Break Detection
 - **Objective**: Detect broken predecessor linkage.
 - **Preconditions**: Chain-enabled seals.
 - **Input**: Remove or corrupt predecessor chain hash.
@@ -149,7 +149,7 @@ Testing begins only when:
 - **Severity**: High
 - **Automation Feasibility**: Medium
 
-### POG-TST-011 — Revocation Bypass Attempt
+### POG-TST-011 - Revocation Bypass Attempt
 - **Objective**: Ensure revoked seals cannot verify as valid through alternate routes.
 - **Preconditions**: Revoked seal + UI/API access.
 - **Input**: Query API, UI page, cached route.
@@ -158,7 +158,7 @@ Testing begins only when:
 - **Severity**: Critical
 - **Automation Feasibility**: Medium
 
-### POG-TST-012 — Unauthorized Resealing
+### POG-TST-012 - Unauthorized Resealing
 - **Objective**: Ensure non-privileged users cannot reseal.
 - **Preconditions**: User without elevated role.
 - **Input**: Attempt reseal call.
@@ -169,7 +169,7 @@ Testing begins only when:
 - **Severity**: Critical
 - **Automation Feasibility**: High
 
-### POG-TST-013 — Timeline Falsification
+### POG-TST-013 - Timeline Falsification
 - **Objective**: Detect invalid chronology or tampered timestamps.
 - **Preconditions**: Pack with timeline fixture.
 - **Input**: Reorder timestamps to impossible sequence.
@@ -180,7 +180,7 @@ Testing begins only when:
 - **Severity**: High
 - **Automation Feasibility**: Medium
 
-### POG-TST-014 — Evidence Substitution Attack
+### POG-TST-014 - Evidence Substitution Attack
 - **Objective**: Ensure swapping one evidence item with another is detectable.
 - **Preconditions**: Existing sealed pack with known item hashes.
 - **Input**: Replace evidence item payload but preserve metadata where possible.
@@ -193,7 +193,7 @@ Testing begins only when:
 
 ## 7. Regression Tests
 
-### POG-TST-015 — Tenant Isolation Regression
+### POG-TST-015 - Tenant Isolation Regression
 - **Objective**: Prevent recurrence of tenant attribution failures.
 - **Preconditions**: Multi-tenant fixture dataset.
 - **Input**: Attempt cross-tenant pack composition.
@@ -204,7 +204,7 @@ Testing begins only when:
 - **Severity**: Critical
 - **Automation Feasibility**: High
 
-### POG-TST-016 — Verify Route Public Accessibility
+### POG-TST-016 - Verify Route Public Accessibility
 - **Objective**: Ensure intended public verify route stays publicly reachable while secure.
 - **Preconditions**: Deployed route with public allowlist.
 - **Input**: Anonymous GET verify.
@@ -215,7 +215,7 @@ Testing begins only when:
 - **Severity**: High
 - **Automation Feasibility**: High
 
-### POG-TST-017 — Rendering Status Consistency
+### POG-TST-017 - Rendering Status Consistency
 - **Objective**: Ensure JSON, HTML, and PDF agree on object status.
 - **Preconditions**: Existing valid and revoked artifacts.
 - **Input**: Render all output formats.
@@ -226,7 +226,7 @@ Testing begins only when:
 
 ## 8. Compatibility Tests
 
-### POG-TST-018 — Previous Supported Schema Verification
+### POG-TST-018 - Previous Supported Schema Verification
 - **Objective**: Verify previous supported major version remains readable if policy allows.
 - **Preconditions**: Fixture with previous major version.
 - **Input**: Verification request.
@@ -235,7 +235,7 @@ Testing begins only when:
 - **Severity**: Medium
 - **Automation Feasibility**: Medium
 
-### POG-TST-019 — Incompatible Schema Hard Fail
+### POG-TST-019 - Incompatible Schema Hard Fail
 - **Objective**: Ensure incompatible major version fails safely.
 - **Preconditions**: Fixture with unsupported version.
 - **Input**: Verify request.
@@ -246,7 +246,7 @@ Testing begins only when:
 
 ## 9. Multi-Tenant Tests
 
-### POG-TST-020 — Cross-Tenant Verify Leakage
+### POG-TST-020 - Cross-Tenant Verify Leakage
 - **Objective**: Ensure public verify does not expose forbidden tenant-private metadata.
 - **Preconditions**: Sealed object from tenant A.
 - **Input**: Public verify call by arbitrary client.
@@ -255,7 +255,7 @@ Testing begins only when:
 - **Severity**: Critical
 - **Automation Feasibility**: High
 
-### POG-TST-021 — Tenant-Specific Admin Action Enforcement
+### POG-TST-021 - Tenant-Specific Admin Action Enforcement
 - **Objective**: Ensure admin tooling respects tenant scope rules.
 - **Preconditions**: Privileged user with scoped access.
 - **Input**: Revoke/reseal outside authorized scope.
@@ -266,7 +266,7 @@ Testing begins only when:
 
 ## 10. Rendering Integrity Tests
 
-### POG-TST-022 — PDF Binary Hash Persistence
+### POG-TST-022 - PDF Binary Hash Persistence
 - **Objective**: Ensure rendered PDF hash is stored and retrievable.
 - **Preconditions**: Generated PDF artifact.
 - **Input**: Request rendered artifact metadata.
@@ -275,7 +275,7 @@ Testing begins only when:
 - **Severity**: Medium
 - **Automation Feasibility**: Medium
 
-### POG-TST-023 — Visible Integrity Metadata in PDF
+### POG-TST-023 - Visible Integrity Metadata in PDF
 - **Objective**: Ensure PDF displays visible seal, hash, and verification information.
 - **Preconditions**: Premium PDF generated.
 - **Input**: Open PDF text layer or visual assertion.
@@ -286,7 +286,7 @@ Testing begins only when:
 
 ## 11. Verification Consistency Tests
 
-### POG-TST-024 — Repeat Verification Determinism
+### POG-TST-024 - Repeat Verification Determinism
 - **Objective**: Ensure repeated verification returns stable result absent state change.
 - **Preconditions**: Existing valid seal.
 - **Input**: Multiple verify calls over time.
@@ -295,7 +295,7 @@ Testing begins only when:
 - **Severity**: High
 - **Automation Feasibility**: High
 
-### POG-TST-025 — Revocation Propagation Consistency
+### POG-TST-025 - Revocation Propagation Consistency
 - **Objective**: Ensure revocation is visible immediately across API and UI.
 - **Preconditions**: Valid seal then revoke action.
 - **Input**: Verify before and after revocation.
@@ -306,7 +306,7 @@ Testing begins only when:
 - **Severity**: High
 - **Automation Feasibility**: Medium
 
-### POG-TST-026 — Verification Error Path Safety
+### POG-TST-026 - Verification Error Path Safety
 - **Objective**: Ensure dependency failures do not produce false valid responses.
 - **Preconditions**: Simulated verifier dependency outage.
 - **Input**: Verify request.
