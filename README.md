@@ -23,18 +23,18 @@ A system is PoG-conformant only if every governed decision produces an artifact 
 
 | Document | ID | Version | Status |
 |----------|----|---------|--------|
-| [Technical Specification](docs/POG-SPEC.md) | POG-SPEC | 1.1.0 | Draft, open for review |
+| [Technical Specification](docs/POG-SPEC.md) | POG-SPEC | 1.1.1 | Draft, open for review |
 | [Threat Model](docs/POG-THREAT-MODEL.md) | POG-TM | 1.1.0 | Draft, open for review |
-| [Conformance Test Plan](docs/POG-CONFORMANCE.md) | POG-CTP | 1.1.0 | Draft, open for review |
-| [Claims Policy](docs/POG-CLAIMS-POLICY.md) | POG-CP | 1.0.0 | Draft, open for review |
+| [Conformance Test Plan](docs/POG-CONFORMANCE.md) | POG-CTP | 1.1.1 | Draft, open for review |
+| [Claims Policy](docs/POG-CLAIMS-POLICY.md) | POG-CP | 1.1.0 | Draft, open for review |
 
 ## Status, stated plainly
 
-PoG is a framework initiated and maintained by **Smart STB Sàrl** (Geneva, Switzerland). The reference implementation is [PREVORN](https://prevorn.ch), operated in production on Swiss infrastructure. This is a single-vendor framework opening itself to scrutiny, not an industry consortium, and we will not pretend otherwise.
+PoG is a framework initiated and maintained by **Smart STB Sàrl** (Geneva, Switzerland). [PREVORN](https://prevorn.ch), operated in production on Swiss infrastructure, is the originating implementation: the framework was extracted from it. Conformance of PREVORN to POG-SPEC 1.1 has not yet been demonstrated by the conformance suite, and until a dated conformance report is published here, no document in this repository calls it a reference implementation. This is a single-vendor framework opening itself to scrutiny, not an industry consortium, and we will not pretend otherwise.
 
 | Stage | Gate | Status |
 |-------|------|--------|
-| Technical credibility | Sealing, verification, event-to-evidence chain, tenant-safe attribution | In place (reference implementation) |
+| Technical credibility | Sealing, verification, event-to-evidence chain, tenant-safe attribution | Implemented in the originating implementation; conformance to 1.1 not yet demonstrated by the conformance suite |
 | Framework formalization | Spec, threat model, conformance plan drafted, versioned, published | In progress (drafts v1.1) |
 | External review | Substantive adversarial review by parties independent of Smart STB | Open - reviewers wanted |
 | Independent implementation | At least one conformant implementation not written by the authors | Not started |
