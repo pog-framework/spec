@@ -4,6 +4,21 @@ All notable changes to the PoG Framework documents are recorded here. Substantiv
 
 ## [Unreleased]
 
+## [1.1.0-draft] - 2026-09-25
+
+### Added
+- POG-SPEC 1.1.0: mandatory Ed25519 signature and optional RFC 3161 timestamp token on the Seal (8.8); External Anchor entity (8.12); Signing Key Record entity (8.13); Boundary K, seal store to external anchoring authority (6.1); signing, timestamping and anchoring rules (12.5 to 12.7); two verification outcomes, integrity verified and independently anchored, reported separately (13.2, 13.4); detached verification bundle (13.5); key, anchor and bundle endpoints (15.7 to 15.9); error codes for signature and key failures (16); transition rules from 1.0 (17.1); Annex A, informative profile for an AI-assisted software change record.
+- POG-TM 1.1.0: abuse cases 8.11 to 8.14 (anchor substitution, signing key substitution, timestamp misrepresentation, pending anchor presented as anchored); scenarios G to J; corresponding assets, actors, trust assumptions, controls, logging and residual risks.
+- POG-CTP 1.1.0: tests POG-TST-027 to POG-TST-036; five of them added to the release-blocking set.
+
+### Changed
+- POG-SPEC 12.3: chaining moves from SHOULD to MUST for evidence packs; `previous_chain_hash` is required for every seal after the first of a chain scope.
+- POG-SPEC 3: cryptographic signing is no longer listed as a non-goal; mandating a particular anchoring technology and defining key distribution infrastructure are.
+- POG-SPEC 22: digital signatures and the detached verification bundle leave the deferred list.
+
+### Review
+- Resolves review issue #2 (Seal narrower than the implemented Seal, external anchoring unspecified). Answers to its open questions are recorded in the pull request.
+
 ## [1.0.0-draft] - 2026-07-02
 
 ### Added
