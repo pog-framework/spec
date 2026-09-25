@@ -2,13 +2,16 @@
 
 ## Document Control
 - Document ID: POG-TECH-SPEC-V1
-- Version: 1.1.0
+- Version: 1.1.1
 - Status: Draft, open for review
 - Date: 2026-09-25
-- Supersedes: 1.0.0 (draft, 2026-04-06)
+- Supersedes: 1.1.0 (draft, 2026-09-25)
 - Owner: Smart STB SARL
 - Product Context: PREVORN / PoG Framework
 - Audience: Backend, Frontend, Platform, Security, QA, Product, Architecture
+
+### Changes in 1.1.1
+Errata to 1.1.0. Section 16 contradicted section 15.1: a seal whose signature fails verification was listed as an error condition (POG-422-004, POG-422-005) while 15.1 returns it as a successful verification with `verification_result=invalid`. Section 15.1 is correct. The two error codes are withdrawn and the rule is stated in 13.2 and 16. POG-TST-031 and POG-TST-032 in the conformance plan are corrected accordingly. No other change.
 
 ### Changes in 1.1.0
 Version 1.1.0 answers review issue #2 (Seal narrower than the implemented Seal, external anchoring unspecified). It adds a mandatory signature and an optional timestamp token to the Seal (8.8), a new External Anchor entity (8.12), a new trust boundary (6.1, Boundary K), the signing, timestamping and anchoring rules (12.5 to 12.7), two distinct verification outcomes (13.2 and 13.4), the detached verification bundle (13.5), a key distribution endpoint (15.7), and the compatibility rules for seals produced under 1.0.0 (17). Annex A, informative, maps the PoG entities onto an AI-assisted software change record. The change is additive to the data model; see section 17 for migration.
@@ -550,7 +553,7 @@ The verifier MUST process:
 - `error`: verification failed due to processing issue or unavailable dependency.
 
 Two further fields qualify the result and MUST NOT be collapsed into it:
-- `signature_status`: `valid`, `invalid`, `unsigned` (seal produced under schema 1.0, section 17), or `key_unknown` (the `public_key_id` does not resolve). `invalid` and `key_unknown` MUST force `verification_result=invalid`. `unsigned` MUST NOT force it.
+- `signature_status`: `valid`, `invalid`, `unsigned` (seal produced under schema 1.0, section 17), or `key_unknown` (the `public_key_id` does not resolve). `invalid` and `key_unknown` MUST force `verification_result=invalid`. `unsigned` MUST NOT force it. A seal that exists and fails signature verification is a completed verification with an invalid result, returned with HTTP 200; it is never an HTTP error (16).
 - `anchor_status`: `not_anchored` (no anchor at or beyond this position), `pending` (an anchor at or beyond this position exists, not yet confirmed), `anchored` (a confirmed anchor at or beyond this position exists, the chain up to it is intact, and the recomputed seal hash at the anchored position equals `anchored_digest`; see 8.12, coverage semantics), `superseded` (every anchor that would cover this position was superseded; the Revocation Record MUST be referenced).
 
 The two outcomes an implementation MUST distinguish are therefore:
@@ -697,14 +700,12 @@ Returns the detached verification bundle (13.5). Publicly reachable without auth
 | POG-422-001 | integrity_check_failed | 422 |
 | POG-422-002 | tenant_attribution_mismatch | 422 |
 | POG-422-003 | unsupported_schema_version | 422 |
-| POG-422-004 | signature_invalid | 422 |
-| POG-422-005 | signing_key_unknown | 422 |
 | POG-404-003 | anchor_not_found | 404 |
 | POG-404-004 | signing_key_not_found | 404 |
 | POG-500-001 | verification_processing_error | 500 |
 | POG-503-001 | verifier_dependency_unavailable | 503 |
 
-Signature and key errors apply to verification of a seal; they are never returned by the sealing endpoint, which MUST fail closed with `POG-500-001` if it cannot sign.
+Integrity outcomes are not HTTP errors. A verification that completes and finds an invalid payload, a broken chain, an invalid signature or an unknown key MUST return HTTP 200 with `verification_result=invalid` and the qualifying fields of 13.2. HTTP 4xx codes are reserved for malformed or unknown identifiers, authorization and unsupported schemas; 5xx for processing failures. The sealing endpoint MUST fail closed with `POG-500-001` if it cannot sign. The codes POG-422-004 and POG-422-005 listed in 1.1.0 are withdrawn and MUST NOT be reused.
 
 ## 17. Versioning Policy
 
