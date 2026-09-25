@@ -4,6 +4,15 @@ All notable changes to the PoG Framework documents are recorded here. Substantiv
 
 ## [Unreleased]
 
+## [1.1.1-draft] - 2026-09-25
+
+### Fixed
+- POG-SPEC 1.1.1: section 16 contradicted section 15.1 on a seal whose signature fails verification. The verification completes with HTTP 200 and `verification_result=invalid`; the codes POG-422-004 and POG-422-005 are withdrawn (13.2, 16).
+- POG-CTP 1.1.1: POG-TST-031 and POG-TST-032 expect HTTP 200 with `signature_status=invalid` or `key_unknown`.
+
+### Changed
+- POG-CP 1.1.0: "reference implementation" becomes a claim to be earned, conditional on a dated conformance report produced by executing the conformance plan. PREVORN is described as the originating implementation. README aligned.
+
 ## [1.1.0-draft] - 2026-09-25
 
 ### Added
