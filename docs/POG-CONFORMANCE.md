@@ -2,12 +2,15 @@
 
 ## Document Control
 - Document ID: POG-CONFORMANCE-TEST-PLAN-V1
-- Version: 1.1.0
+- Version: 1.1.1
 - Status: Draft, open for review
 - Date: 2026-09-25
-- Supersedes: 1.0.0 (draft, 2026-04-06)
+- Supersedes: 1.1.0 (draft, 2026-09-25)
 - Owner: Smart STB SARL
 - Audience: QA, Security, Backend, Platform, Release Managers
+
+### Changes in 1.1.1
+Errata: POG-TST-031 and POG-TST-032 expected HTTP 422 codes that POG-SPEC 1.1.1 withdraws; an invalid signature or an unknown key is a completed verification returned with HTTP 200 and `verification_result=invalid`. No other change.
 
 ### Changes in 1.1.0
 Adds tests POG-TST-027 to POG-TST-036 for signatures, timestamp tokens, external anchoring, the two verification outcomes, the detached verification bundle and the 1.0 to 1.1 transition (POG-SPEC 1.1.0). Adds POG-TST-027, 028, 029, 031 and 035 to the release-blocking set. Answers review issue #2, section 7.
@@ -374,7 +377,7 @@ Testing begins only when:
 - **Preconditions**: Signed seal.
 - **Input**: Alter one byte of `signature.value`; separately, alter `sealed_at` and keep the signature.
 - **Expected Output**:
-  - `signature_status=invalid`, `verification_result=invalid`, POG-422-004 on the verify path
+  - HTTP 200, `signature_status=invalid`, `verification_result=invalid`, `failure_reason` populated
 - **Failure Mode**: `valid` in either case.
 - **Severity**: Critical
 - **Automation Feasibility**: High
@@ -383,7 +386,7 @@ Testing begins only when:
 - **Objective**: A seal referencing a `public_key_id` with no Signing Key Record fails closed.
 - **Preconditions**: Signed seal; key record removed or never published.
 - **Input**: Verify `seal_id`.
-- **Expected Output**: `signature_status=key_unknown`, `verification_result=invalid`, POG-422-005.
+- **Expected Output**: HTTP 200, `signature_status=key_unknown`, `verification_result=invalid`, `failure_reason` populated.
 - **Failure Mode**: `valid` or `unsigned`.
 - **Severity**: Critical
 - **Automation Feasibility**: High
