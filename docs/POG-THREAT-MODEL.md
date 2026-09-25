@@ -2,11 +2,15 @@
 
 ## Document Control
 - Document ID: POG-THREAT-MODEL-V1
-- Version: 1.0.0
+- Version: 1.1.0
 - Status: Draft, open for review
-- Date: 2026-04-06
+- Date: 2026-09-25
+- Supersedes: 1.0.0 (draft, 2026-04-06)
 - Owner: Smart STB SARL
 - Audience: Security, Architecture, Backend, Platform, QA, Leadership
+
+### Changes in 1.1.0
+Adds the assets, actors, abuse cases, scenarios, controls and residual risks introduced by signatures, timestamp tokens and external anchoring (POG-SPEC 1.1.0, sections 8.8, 8.12, 8.13, 12.5 to 12.7 and 13). Answers review issue #2, section 6.
 
 ## 1. Purpose
 
@@ -39,6 +43,11 @@ PoG security aims to preserve:
 - Hash values
 - Chain linking metadata
 - Schema version metadata
+- Seal signatures and signing private keys
+- Signing Key Records (public keys, validity periods, retirement and compromise state)
+- Timestamp tokens
+- External Anchor records and their external references
+- Detached verification bundles
 
 ### 3.2 Secondary Assets
 - Rendering templates
@@ -50,6 +59,8 @@ PoG security aims to preserve:
 - Migration scripts
 - Admin tooling
 - Observability telemetry
+- Key distribution endpoint and any out-of-band key publication
+- Anchoring authority integration
 
 ## 4. Actors
 
@@ -63,6 +74,8 @@ PoG security aims to preserve:
 - Administrator
 - Auditor
 - External customer verifier
+- Timestamping authority
+- Anchoring authority
 
 ### 4.2 Adversarial Actors
 - External attacker
@@ -73,6 +86,8 @@ PoG security aims to preserve:
 - API abuser
 - Supply-chain compromised component
 - Accidental but destructive operator
+- Compromised or malicious anchoring or timestamping authority
+- Actor able to publish under a trusted `public_key_id`
 
 ## 5. Trust Assumptions
 
@@ -83,6 +98,9 @@ PoG security aims to preserve:
 5. The database is authoritative for persistence but not beyond integrity checks.
 6. UI rendering is not a trusted source of validity.
 7. Schema migration is a security-relevant activity.
+8. The producer has no privileged channel to revise what an anchoring authority has recorded (POG-SPEC Boundary K). If this assumption fails for a given authority, that authority provides no independence and MUST NOT be presented as an anchor.
+9. Verifiers trust the key distribution channel. The channel, not the signature algorithm, is the weakest link of signature verification.
+10. Anchoring and timestamping authorities MAY be unavailable at any time; the framework degrades to explicit pending states, never to false validity.
 
 ## 6. Threat Boundaries
 
@@ -96,6 +114,8 @@ PoG security aims to preserve:
 - Rendering path
 - Export/download path
 - Monitoring and audit path
+- Seal store to anchoring authority (outbound only)
+- Key publication path
 
 ## 7. Attack Surfaces
 
@@ -112,6 +132,10 @@ PoG security aims to preserve:
 - Database migrations
 - Cross-tenant queries
 - Internal object lookup APIs
+- Signing service and key storage
+- Key distribution endpoint
+- Anchor submission and confirmation polling
+- Detached bundle export
 
 ## 8. Key Abuse Cases
 
@@ -254,27 +278,83 @@ Privileged insider manipulates packs, revokes seals improperly, or edits metadat
 - high-risk action alerts,
 - review workflow for revocation and resealing.
 
+### 8.11 Anchor Substitution
+An actor with sufficient privilege supersedes an External Anchor and re-anchors a rewritten chain, so that a full rewrite becomes indistinguishable from an intact history.
+
+**Impact**
+- loss of the only reference point the producer cannot revise,
+- false "independently anchored" outcome,
+- collapse of P4 for the covered range.
+
+**Required Controls**
+- anchor supersession MUST produce a Revocation Record (POG-SPEC 8.10, 12.7) and be surfaced to the tenant,
+- superseded anchors remain queryable with their original `external_reference`,
+- the authority's record MUST remain independently retrievable; an anchor type whose record can be withdrawn by the producer is not an anchor,
+- elevated authorization plus reason plus review for supersession,
+- alert on any supersession.
+
+### 8.12 Signing Key Substitution
+An actor publishes a key under a `public_key_id` that verifiers already trust, or introduces a new key record that verifiers accept without noticing, and signs rewritten seals with it.
+
+**Impact**
+- forged seals that verify,
+- repudiation of legitimate seals by declaring the genuine key compromised.
+
+**Required Controls**
+- key distribution through a documented channel independent of the producer UI (POG-SPEC 12.5, 15.7), with RECOMMENDED publication outside the producer's infrastructure,
+- Signing Key Records are append-only; a `public_key_id` MUST NOT be reassigned,
+- retirement and compromise declarations are access-controlled, audited, and carry a time that verifiers apply (POG-SPEC 8.13),
+- alert on any key record change.
+
+### 8.13 Timestamp Misrepresentation
+A non-qualified timestamp is presented as qualified, or the absence of a timestamp token is hidden in rendering.
+
+**Impact**
+- legal value of the artifact overstated,
+- Claims Policy violation.
+
+**Required Controls**
+- `qualified` flag set from the anchor's recorded regime, never from the authority name (POG-SPEC 12.6),
+- rendering and API MUST show `timestamp_token=null` as absent,
+- conformance test on the rendering of both cases.
+
+### 8.14 Pending Anchor Presented as Anchored
+Verification or rendering reports a chain position as anchored while the only anchors at or beyond it are pending or failed, or while the seal lies after the last confirmed anchor.
+
+**Impact**
+- false independence claim for the affected range.
+
+**Required Controls**
+- `anchor_status` computed from `anchored_chain_position`, `status` and chain recomputation only (POG-SPEC 8.12, 13.2),
+- integrity alert when an anchor stays pending beyond the declared target latency,
+- conformance tests POG-TST-027 to POG-TST-030.
+
 ## 9. STRIDE-Oriented Threat Mapping
 
 ### Spoofing
 - fake verifier service
 - fake admin identity
 - impersonated service account
+- forged signing key record
 
 **Mitigations**
 - strong service authentication
 - audited privileged actions
 - mTLS or signed service identity where feasible
+- append-only key records, out-of-band key publication
 
 ### Tampering
 - payload alteration
 - hash changes
 - seal metadata edits
 - rendering substitution
+- full-chain rewrite with re-anchoring
 
 **Mitigations**
 - canonical hash verification
+- seal signatures over the canonical payload
 - append-only or immutable history where feasible
+- external anchor with revocation record on supersession
 - rendering hash generation
 - integrity alerts
 
@@ -282,12 +362,14 @@ Privileged insider manipulates packs, revokes seals improperly, or edits metadat
 - actor denies approval
 - admin denies revocation
 - system cannot prove state transition
+- producer denies having sealed an artifact, or claims a different sealing time
 
 **Mitigations**
 - decision records
 - audit trail
 - decision-to-action linkage
 - revocation record
+- signature and timestamp token on every seal, anchor for the sealing time
 
 ### Information Disclosure
 - cross-tenant evidence leakage
@@ -375,6 +457,40 @@ Chain predecessor hash missing or inconsistent after migration.
 - object MAY remain inspectable but not chain-verified,
 - migration incident raised.
 
+### Scenario G - Full-Chain Rewrite Behind an Unchanged Anchor
+Privileged actor rewrites every seal of a chain scope, re-signs them with the active key, and leaves the confirmed anchor untouched.
+
+**Expected Control Outcome**
+- verification recomputes the seal hash at `anchored_chain_position` and finds it differs from `anchored_digest`,
+- chain_integrity=broken for the covered range,
+- anchor_status never reported as anchored for that range,
+- integrity alert emitted.
+
+### Scenario H - Anchor Superseded Without Revocation Record
+Privileged actor replaces the anchor record in place, with a new `anchored_digest` matching the rewritten chain.
+
+**Expected Control Outcome**
+- blocked: the anchor endpoint MUST refuse an in-place change,
+- if it nevertheless occurs, verification detects the missing Revocation Record for the previously published `anchor_id` and returns an integrity failure,
+- alert emitted, tenant notified.
+
+### Scenario I - Key Rotation Presented as Compromise
+Actor declares the genuine key compromised with a backdated `compromised_at` to invalidate legitimate seals.
+
+**Expected Control Outcome**
+- compromise declaration requires elevated authorization, reason and review,
+- seals carrying a trusted timestamp token earlier than `compromised_at` keep `signature_status=valid`,
+- audit event and alert emitted.
+
+### Scenario J - Anchoring Authority Outage
+The anchoring authority is unreachable for longer than the declared target latency.
+
+**Expected Control Outcome**
+- sealing continues,
+- anchors stay `pending`, verification reports `anchor_status=pending`,
+- integrity alert on overrun,
+- no silent switch to another anchor type.
+
 ## 11. Controls
 
 ## 11.1 Preventive Controls
@@ -388,6 +504,9 @@ Chain predecessor hash missing or inconsistent after migration.
 - public/private schema split
 - migration controls
 - explicit revocation workflow
+- server-side signing with non-exportable private keys
+- append-only signing key records
+- anchor supersession only through the revocation workflow
 
 ## 11.2 Detective Controls
 - integrity mismatch alerts
@@ -397,6 +516,10 @@ Chain predecessor hash missing or inconsistent after migration.
 - repeated verify abuse detection
 - unusual reseal/revoke pattern detection
 - schema incompatibility alerts
+- signature verification failures and unknown key references
+- anchor supersession and anchor pending overrun alerts
+- key record changes (publication, retirement, compromise)
+- `anchored_digest` mismatch on recomputation
 
 ## 11.3 Corrective Controls
 - revocation of invalid seals
@@ -405,6 +528,8 @@ Chain predecessor hash missing or inconsistent after migration.
 - migration rollback where feasible
 - cache purge mechanisms
 - admin review and forensics
+- key retirement and compromise declaration with recorded time
+- re-anchoring with a Revocation Record for the superseded anchor
 
 ## 12. Logging and Monitoring Requirements
 
@@ -418,6 +543,10 @@ The platform MUST log:
 - chain integrity failures
 - unsupported schema verification attempts
 - admin actions on PoG objects
+- signature verification failures
+- key record changes
+- anchor submissions, confirmations, failures and supersessions
+- detached bundle exports
 
 The platform SHOULD monitor:
 - verification latency
@@ -427,6 +556,8 @@ The platform SHOULD monitor:
 - cross-tenant access denials
 - chain break rate
 - schema mismatch rate
+- anchor confirmation latency against the declared target
+- share of seals without timestamp token
 
 ## 13. Residual Risks
 
@@ -435,8 +566,11 @@ Residual risks remain for:
 - corruption before ingestion from trusted but compromised sources,
 - sophisticated supply-chain compromise,
 - incomplete lineage from legacy migrated data,
-- dependence on SHA-256 until stronger or signed model adopted,
-- public UI spoofing outside platform control.
+- dependence on SHA-256 and Ed25519 until further algorithms are adopted,
+- public UI spoofing outside platform control,
+- trust in the key distribution channel: a verifier who obtains a forged key record from a compromised channel cannot detect forged seals; the control is organizational (out-of-band publication) rather than technical,
+- trust in the anchoring authority: independence holds only as long as the authority's record stays retrievable and unrevisable by the producer; a compromised authority removes independence for the covered range without removing integrity verification,
+- seals produced under 1.0 remain unsigned and unanchored unless re-sealed, and re-sealing is itself a producer action.
 
 Each residual risk MUST be documented, accepted, reduced, or scheduled.
 
@@ -472,4 +606,7 @@ PoG security work is not done unless:
 - public verification is rate-limited and safe,
 - unsupported schema handling fails safely,
 - chain break detection exists,
+- signature verification failures and unknown keys fail closed,
+- anchor supersession without revocation record is detected,
+- pending anchors are never reported as anchored,
 - threat model has been reviewed by Security.
