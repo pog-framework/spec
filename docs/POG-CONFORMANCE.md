@@ -2,11 +2,15 @@
 
 ## Document Control
 - Document ID: POG-CONFORMANCE-TEST-PLAN-V1
-- Version: 1.0.0
+- Version: 1.1.0
 - Status: Draft, open for review
-- Date: 2026-04-06
+- Date: 2026-09-25
+- Supersedes: 1.0.0 (draft, 2026-04-06)
 - Owner: Smart STB SARL
 - Audience: QA, Security, Backend, Platform, Release Managers
+
+### Changes in 1.1.0
+Adds tests POG-TST-027 to POG-TST-036 for signatures, timestamp tokens, external anchoring, the two verification outcomes, the detached verification bundle and the 1.0 to 1.1 transition (POG-SPEC 1.1.0). Adds POG-TST-027, 028, 029, 031 and 035 to the release-blocking set. Answers review issue #2, section 7.
 
 ## 1. Purpose
 
@@ -22,6 +26,7 @@ This document defines the conformance and adversarial test plan for PoG Framewor
 - Multi-tenant tests
 - Rendering integrity tests
 - Verification consistency tests
+- Signature and anchoring tests (since 1.1.0)
 
 ## 3. Conformance Entry Criteria
 
@@ -317,6 +322,108 @@ Testing begins only when:
 - **Severity**: Critical
 - **Automation Feasibility**: Medium
 
+## 11a. Signature and Anchoring Tests
+
+### POG-TST-027 - Independently Anchored Result
+- **Objective**: A chain position covered by a confirmed External Anchor returns the independently anchored outcome, and the external reference resolves outside the producing system.
+- **Preconditions**: Chain scope with a confirmed anchor; seal at a position at or before `anchored_chain_position`.
+- **Input**: Verify `seal_id`; retrieve `anchor.external_reference` from a client with no access to the producer's infrastructure.
+- **Expected Output**:
+  - `verification_result=valid`, `signature_status=valid`, `anchor_status=anchored`
+  - the authority's record retrieved via `external_reference` reproduces `anchored_digest`
+- **Failure Mode**: `anchored` reported without a resolvable reference, or digest mismatch.
+- **Severity**: Critical
+- **Automation Feasibility**: Medium
+
+### POG-TST-028 - Full-Chain Rewrite Behind an Unchanged Anchor
+- **Objective**: A chain rewritten in full, re-signed with the active key, with the anchor left unchanged, is detected.
+- **Preconditions**: Confirmed anchor at position n; test harness able to rewrite every seal of the chain scope.
+- **Input**: Rewrite the chain; verify any seal at a position at or before n.
+- **Expected Output**:
+  - `chain_integrity=broken`
+  - `anchor_status` never `anchored` for the range
+  - integrity alert emitted
+- **Failure Mode**: `valid` and `anchored` after rewrite.
+- **Severity**: Critical
+- **Automation Feasibility**: Medium
+
+### POG-TST-029 - Anchor Superseded Without Revocation Record
+- **Objective**: An anchor replaced in place, without a Revocation Record, is a failure state.
+- **Preconditions**: Confirmed anchor with published `anchor_id`.
+- **Input**: Attempt in-place change of `anchored_digest` through the admin path; then simulate a direct database change.
+- **Expected Output**:
+  - admin path: refused, POG-409-001
+  - database change: verification returns an integrity failure referencing the missing Revocation Record; alert emitted
+- **Failure Mode**: Rewritten anchor accepted silently.
+- **Severity**: Critical
+- **Automation Feasibility**: Medium
+
+### POG-TST-030 - Pending Anchor Is Not Anchored
+- **Objective**: While anchoring is pending, verification returns integrity verified and MUST NOT return independently anchored.
+- **Preconditions**: Anchor with `status=pending` at position n; no confirmed anchor at or beyond n.
+- **Input**: Verify a seal at a position at or before n.
+- **Expected Output**:
+  - `verification_result=valid`, `signature_status=valid`, `anchor_status=pending`
+  - rendering shows the pending state
+- **Failure Mode**: `anchored` reported, or verification error.
+- **Severity**: Critical
+- **Automation Feasibility**: High
+
+### POG-TST-031 - Signature Tampering
+- **Objective**: A seal whose canonical payload or signature value is altered fails signature verification.
+- **Preconditions**: Signed seal.
+- **Input**: Alter one byte of `signature.value`; separately, alter `sealed_at` and keep the signature.
+- **Expected Output**:
+  - `signature_status=invalid`, `verification_result=invalid`, POG-422-004 on the verify path
+- **Failure Mode**: `valid` in either case.
+- **Severity**: Critical
+- **Automation Feasibility**: High
+
+### POG-TST-032 - Unknown Signing Key
+- **Objective**: A seal referencing a `public_key_id` with no Signing Key Record fails closed.
+- **Preconditions**: Signed seal; key record removed or never published.
+- **Input**: Verify `seal_id`.
+- **Expected Output**: `signature_status=key_unknown`, `verification_result=invalid`, POG-422-005.
+- **Failure Mode**: `valid` or `unsigned`.
+- **Severity**: Critical
+- **Automation Feasibility**: High
+
+### POG-TST-033 - Key Rotation Preserves Earlier Seals
+- **Objective**: Retiring a key does not invalidate seals produced during its validity period.
+- **Preconditions**: Seals signed under key A; key A retired; key B active.
+- **Input**: Verify a key-A seal and a key-B seal.
+- **Expected Output**: both `signature_status=valid`; key A returned by 15.7 with `status=retired` and its validity period.
+- **Failure Mode**: key-A seal invalid, or key A no longer published.
+- **Severity**: High
+- **Automation Feasibility**: High
+
+### POG-TST-034 - Timestamp Qualification Rendering
+- **Objective**: A non-qualified timestamp is never rendered as qualified, and a missing token is rendered as absent.
+- **Preconditions**: Seal with `qualified=false`; seal with `timestamp_token=null`.
+- **Input**: Render JSON, HTML and PDF; call public verify.
+- **Expected Output**: `qualified=false` visible as such; null token visible as absent; no channel upgrades either.
+- **Failure Mode**: Any channel shows "qualified" or hides the absence.
+- **Severity**: High
+- **Automation Feasibility**: Medium
+
+### POG-TST-035 - Detached Bundle Verifies Outside the Producer
+- **Objective**: The detached verification bundle (POG-SPEC 13.5) allows an external verifier to reach the producer's result without calling the producer.
+- **Preconditions**: Sealed object with confirmed anchor; reference verifier implementation run on a host with no network path to the producer except the authority's record.
+- **Input**: Export the bundle; run the external verifier.
+- **Expected Output**: `verification_result`, `signature_status` and `anchor_status` identical to the producer's endpoint; no tenant-private field in the bundle.
+- **Failure Mode**: Divergent result, or bundle unusable without producer access.
+- **Severity**: Critical
+- **Automation Feasibility**: Medium
+
+### POG-TST-036 - 1.0 Seal Reported as Unsigned
+- **Objective**: A seal produced under schema 1.0 verifies under a 1.1 verifier as unsigned, not invalid.
+- **Preconditions**: Fixture seal with `schema_version` 1.0 and no signature.
+- **Input**: Verify `seal_id`.
+- **Expected Output**: `verification_result=valid` when payload and chain are intact; `signature_status=unsigned`; `anchor_status=not_anchored`; `protocol_version=1.1`.
+- **Failure Mode**: `invalid`, or `signature_status=valid`.
+- **Severity**: High
+- **Automation Feasibility**: High
+
 ## 12. Release Gating Rules
 
 Release MUST be blocked if any of the following fail:
@@ -329,11 +436,17 @@ Release MUST be blocked if any of the following fail:
 - POG-TST-019
 - POG-TST-020
 - POG-TST-026
+- POG-TST-027
+- POG-TST-028
+- POG-TST-029
+- POG-TST-031
+- POG-TST-035
 
 Release SHOULD be blocked if repeated instability occurs on:
 - POG-TST-017
 - POG-TST-024
 - POG-TST-025
+- POG-TST-030
 
 ## 13. Automation Strategy
 
@@ -345,12 +458,16 @@ Release SHOULD be blocked if repeated instability occurs on:
 - tenant isolation tests
 - unsupported schema tests
 - state transition guard tests
+- signature tampering and unknown key tests
+- pending anchor tests
 
 ### Recommended Automation
 - chain break tests
 - rendering consistency tests
 - latency assertions
 - binary hash persistence
+- full-chain rewrite detection
+- detached bundle external verification
 
 ### Manual / Assisted Validation
 - premium PDF readability
@@ -368,4 +485,5 @@ Conformance is acceptable for release only when:
 - revoked objects cannot appear valid,
 - unsupported schemas fail safely,
 - rendering consistency is acceptable,
+- no channel reports independently anchored without a confirmed anchor,
 - security sign-off is complete.
