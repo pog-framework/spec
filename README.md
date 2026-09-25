@@ -17,15 +17,15 @@ A system is PoG-conformant only if every governed decision produces an artifact 
 | P1 | **Traceability** | Unbroken chain from raw event to final decision. No implicit links. |
 | P2 | **Integrity** | Every artifact sealed at creation. Tampering, substitution, chain corruption and unauthorized resealing are detectable failure states. |
 | P3 | **Governance** | AI-assisted judgments pass through an explicit, recorded human gate before becoming authoritative. |
-| P4 | **Verifiability** | Any artifact can be re-verified after the fact, including outside the system that produced it. |
+| P4 | **Verifiability** | Any artifact can be re-verified after the fact, including outside the system that produced it. Since 1.1 the framework distinguishes integrity verified (from producer-published material) from independently anchored (against a reference the producer cannot revise). |
 
 ## Normative documents
 
 | Document | ID | Version | Status |
 |----------|----|---------|--------|
-| [Technical Specification](docs/POG-SPEC.md) | POG-SPEC | 1.0.0 | Draft, open for review |
-| [Threat Model](docs/POG-THREAT-MODEL.md) | POG-TM | 1.0.0 | Draft, open for review |
-| [Conformance Test Plan](docs/POG-CONFORMANCE.md) | POG-CTP | 1.0.0 | Draft, open for review |
+| [Technical Specification](docs/POG-SPEC.md) | POG-SPEC | 1.1.0 | Draft, open for review |
+| [Threat Model](docs/POG-THREAT-MODEL.md) | POG-TM | 1.1.0 | Draft, open for review |
+| [Conformance Test Plan](docs/POG-CONFORMANCE.md) | POG-CTP | 1.1.0 | Draft, open for review |
 | [Claims Policy](docs/POG-CLAIMS-POLICY.md) | POG-CP | 1.0.0 | Draft, open for review |
 
 ## Status, stated plainly
@@ -35,7 +35,7 @@ PoG is a framework initiated and maintained by **Smart STB Sàrl** (Geneva, Swit
 | Stage | Gate | Status |
 |-------|------|--------|
 | Technical credibility | Sealing, verification, event-to-evidence chain, tenant-safe attribution | In place (reference implementation) |
-| Framework formalization | Spec, threat model, conformance plan drafted, versioned, published | In progress (drafts v1.0) |
+| Framework formalization | Spec, threat model, conformance plan drafted, versioned, published | In progress (drafts v1.1) |
 | External review | Substantive adversarial review by parties independent of Smart STB | Open - reviewers wanted |
 | Independent implementation | At least one conformant implementation not written by the authors | Not started |
 | Protocol-grade language | Stable spec, provable conformance, multiple coherent implementations | **Not earned, by design** |
@@ -61,4 +61,4 @@ Framework documents are published under [CC BY 4.0](LICENSE): read, cite and imp
 
 ---
 
-PoG Framework · initiated and maintained by Smart STB Sàrl, 17 Rue Dancet, 1204 Geneva, Switzerland.
+PoG Framework · initiated and maintained by Smart STB Sàrl, 17 Rue Dancet, 1205 Geneva, Switzerland.
